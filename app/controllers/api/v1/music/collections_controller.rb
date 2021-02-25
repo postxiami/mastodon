@@ -7,6 +7,12 @@ class Api::V1::Music::CollectionsController < Api::BaseController
   before_action :require_user!
   # before_action :set_account
 
+  def show
+	@account = current_account
+		rows = Track.find()
+	render json: rows
+  end
+  
   def create
 	@account = current_account
 	all_results = {}
