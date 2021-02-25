@@ -12,7 +12,8 @@ class CreateAlbums < ActiveRecord::Migration[5.2]
     create_table :albums do |t|
       t.string :name
       t.string :cover
-      t.belongs_to :artist, index: true, foreign_key: true
+      t.string :artist_name
+      t.belongs_to :artist, index: true
       t.datetime :published_at
       t.text :desc
       t.timestamps
@@ -20,16 +21,23 @@ class CreateAlbums < ActiveRecord::Migration[5.2]
 
     create_table :tracks do |t|
       t.string :name
-      t.belongs_to :artist, index: true, foreign_key: true
-      t.belongs_to :album, index: true, foreign_key: true
+      t.string :artist_name
+      t.string :album_name
+      t.belongs_to :artist, index: true
+      t.belongs_to :album, index: true
       t.integer :track_no
       t.timestamps
     end
 
-    create_table :loves do |t|
-      t.string :name
-      t.references :imageable, polymorphic: true
+    create_table :collections do |t|
+      t.integer :collectable_id
+      t.integer :ctype
+      t.integer :account_id
       t.timestamps
     end
+    add_index :collections, [:collectable_id, :ctype, :account_id], unique: true
+	add_index :tracks, [:name, :artist_name, :album_name], unique: true
+	add_index :albums, [:name, :artist_name], unique: true
+	add_index :artists, [:name, :country], unique: true
   end
 end

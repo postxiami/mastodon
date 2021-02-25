@@ -348,11 +348,7 @@ Rails.application.routes.draw do
         resources :list, only: :show
       end
 
-      resource :music, only: [:show] do
-        resources :song, only: [:index], controller: 'instances/peers'
-        resource :album, only: [:show], controller: 'instances/activity'
-        resources :artist, only: [:index], controller: 'instances/rules'
-      end
+      
 
       resources :streaming, only: [:index]
       resources :custom_emojis, only: [:index]
@@ -464,6 +460,10 @@ Rails.application.routes.draw do
         resource :pin, only: :create, controller: 'accounts/pins'
         post :unpin, to: 'accounts/pins#destroy'
         resource :note, only: :create, controller: 'accounts/notes'
+      end
+
+      resource :music, only: [:index, :create, :show, :update, :destroy] do
+        resources :collections, controller: 'music/collections'
       end
 
       resources :lists, only: [:index, :create, :show, :update, :destroy] do

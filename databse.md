@@ -42,3 +42,23 @@ bin/rails generate model MusicFavoite type:string account_id:integer object_id:i
 ### artist_tags
 - artist_id
 - tag_id
+
+
+Book
+    id
+    name
+
+Game
+    id
+    name
+
+Collection
+    collectable_id
+    collectable_type
+    user_id
+
+User
+    books
+    games
+
+存储用户收藏的书或游戏列表

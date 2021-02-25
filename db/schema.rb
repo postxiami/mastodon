@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_21_045109) do
+ActiveRecord::Schema.define(version: 2021_02_24_100155) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -217,6 +217,19 @@ ActiveRecord::Schema.define(version: 2021_02_21_045109) do
     t.index ["target_type", "target_id"], name: "index_admin_action_logs_on_target_type_and_target_id"
   end
 
+  create_table "albums", force: :cascade do |t|
+    t.string "name"
+    t.string "cover"
+    t.string "artist_name"
+    t.bigint "artist_id"
+    t.datetime "published_at"
+    t.text "desc"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["artist_id"], name: "index_albums_on_artist_id"
+    t.index ["name", "artist_name"], name: "index_albums_on_name_and_artist_name", unique: true
+  end
+
   create_table "announcement_mutes", force: :cascade do |t|
     t.bigint "account_id"
     t.bigint "announcement_id"
@@ -251,6 +264,16 @@ ActiveRecord::Schema.define(version: 2021_02_21_045109) do
     t.bigint "status_ids", array: true
   end
 
+  create_table "artists", force: :cascade do |t|
+    t.string "name"
+    t.string "cover"
+    t.string "country"
+    t.text "desc"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name", "country"], name: "index_artists_on_name_and_country", unique: true
+  end
+
   create_table "backups", force: :cascade do |t|
     t.bigint "user_id"
     t.string "dump_file_name"
@@ -279,6 +302,15 @@ ActiveRecord::Schema.define(version: 2021_02_21_045109) do
     t.datetime "updated_at", null: false
     t.index ["account_id", "status_id"], name: "index_bookmarks_on_account_id_and_status_id", unique: true
     t.index ["status_id"], name: "index_bookmarks_on_status_id"
+  end
+
+  create_table "collections", force: :cascade do |t|
+    t.integer "collectable_id"
+    t.integer "ctype"
+    t.integer "account_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["collectable_id", "ctype", "account_id"], name: "index_collections_on_collectable_id_and_ctype_and_account_id", unique: true
   end
 
   create_table "conversation_mutes", force: :cascade do |t|
@@ -491,6 +523,15 @@ ActiveRecord::Schema.define(version: 2021_02_21_045109) do
     t.datetime "updated_at", null: false
     t.integer "replies_policy", default: 0, null: false
     t.index ["account_id"], name: "index_lists_on_account_id"
+  end
+
+  create_table "loves", force: :cascade do |t|
+    t.string "name"
+    t.string "imageable_type"
+    t.bigint "imageable_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["imageable_type", "imageable_id"], name: "index_loves_on_imageable_type_and_imageable_id"
   end
 
   create_table "markers", force: :cascade do |t|
@@ -858,6 +899,20 @@ ActiveRecord::Schema.define(version: 2021_02_21_045109) do
     t.boolean "by_moderator"
     t.index ["account_id"], name: "index_tombstones_on_account_id"
     t.index ["uri"], name: "index_tombstones_on_uri"
+  end
+
+  create_table "tracks", force: :cascade do |t|
+    t.string "name"
+    t.string "artist_name"
+    t.string "album_name"
+    t.bigint "artist_id"
+    t.bigint "album_id"
+    t.integer "track_no"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["album_id"], name: "index_tracks_on_album_id"
+    t.index ["artist_id"], name: "index_tracks_on_artist_id"
+    t.index ["name", "artist_name", "album_name"], name: "index_tracks_on_name_and_artist_name_and_album_name", unique: true
   end
 
   create_table "unavailable_domains", force: :cascade do |t|
