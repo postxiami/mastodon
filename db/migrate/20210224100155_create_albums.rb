@@ -35,9 +35,10 @@ class CreateAlbums < ActiveRecord::Migration[5.2]
       t.integer :account_id
       t.timestamps
     end
+    
     add_index :collections, [:collectable_id, :ctype, :account_id], unique: true
-	add_index :tracks, [:name, :artist_name, :album_name], unique: true
-	add_index :albums, [:name, :artist_name], unique: true
-	add_index :artists, [:name, :country], unique: true
+  	add_index :tracks, [:name, :artist_name, :album_name], unique: true
+  	add_index :albums, [:name, :artist_name], unique: true
+  	add_index :artists, [:name, :country], unique: true
   end
 end

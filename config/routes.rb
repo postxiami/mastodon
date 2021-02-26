@@ -348,8 +348,6 @@ Rails.application.routes.draw do
         resources :list, only: :show
       end
 
-      
-
       resources :streaming, only: [:index]
       resources :custom_emojis, only: [:index]
       resources :suggestions, only: [:index, :destroy]
@@ -464,6 +462,9 @@ Rails.application.routes.draw do
 
       resource :music, only: [:index, :create, :show, :update, :destroy] do
         resources :collections, controller: 'music/collections'
+        get 'my/:content_type', to: 'music/list#index'
+        # get 'my/albums', controller: 'music/list#index'
+        # get 'my/artists', controller: 'music/list#index'
       end
 
       resources :lists, only: [:index, :create, :show, :update, :destroy] do

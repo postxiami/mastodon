@@ -13,4 +13,5 @@
 #
 
 class Artist < ApplicationRecord
+	include Paginable
 end

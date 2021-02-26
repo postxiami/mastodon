@@ -13,4 +13,5 @@
 #  updated_at   :datetime         not null
 #
 class Album < ApplicationRecord
+	include Paginable
 end
