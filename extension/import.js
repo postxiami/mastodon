@@ -44,7 +44,10 @@ async function importFromJson(type, rows) {
             return {
                 name: _.album_name,
                 artist_name: _.artist_name,
-                cover: _.album_logo
+                cover: _.album_logo,
+                company: _.company,
+                play_count: _.play_count,
+                published_at: _.publish
             }
         }
 
@@ -52,6 +55,9 @@ async function importFromJson(type, rows) {
             return {
                 name: _.artist_name,
                 cover: _.artist_logo,
+                gender: _.gender,
+                alias: _.alias,
+                play_count: _.play_count,
                 country: _.area
             }
         }
@@ -71,7 +77,9 @@ async function importFromJson(type, rows) {
 
 
 async function importAll() {
-    for(var type in app.userData) {
+    var allDataTypes = ['artist', 'album', 'song'];
+    for(var k in allDataTypes) {
+        const type = allDataTypes[k]
         const rows = app.userData[type]
         await importFromJson(type, rows)
     }

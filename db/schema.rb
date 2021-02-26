@@ -223,10 +223,13 @@ ActiveRecord::Schema.define(version: 2021_02_24_100155) do
     t.string "artist_name"
     t.bigint "artist_id"
     t.datetime "published_at"
+    t.integer "play_count"
     t.text "desc"
+    t.string "company"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["artist_id"], name: "index_albums_on_artist_id"
+    t.index ["company"], name: "index_albums_on_company"
     t.index ["name", "artist_name"], name: "index_albums_on_name_and_artist_name", unique: true
   end
 
@@ -267,7 +270,10 @@ ActiveRecord::Schema.define(version: 2021_02_24_100155) do
   create_table "artists", force: :cascade do |t|
     t.string "name"
     t.string "cover"
+    t.string "alias"
+    t.string "gender"
     t.string "country"
+    t.integer "play_count"
     t.text "desc"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

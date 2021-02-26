@@ -8,7 +8,9 @@
 #  artist_name  :string
 #  artist_id    :bigint(8)
 #  published_at :datetime
+#  play_count   :integer
 #  desc         :text
+#  company      :string
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
 #

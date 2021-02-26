@@ -80,6 +80,8 @@ Rails.application.routes.draw do
     resource :unfollow, only: [:create], controller: :account_unfollow
 
     resources :music, only: [:index], controller: :account_music
+    get 'music/:content_type', to: 'account_music#index'
+
     resource :outbox, only: [:show], module: :activitypub
     resource :inbox, only: [:create], module: :activitypub
     resource :claim, only: [:create], module: :activitypub
@@ -95,6 +97,8 @@ Rails.application.routes.draw do
   get '/@:username/tagged/:tag', to: 'accounts#show', as: :short_account_tag
   get '/@:account_username/:id', to: 'statuses#show', as: :short_account_status
   get '/@:account_username/:id/embed', to: 'statuses#embed', as: :embed_short_account_status
+  
+  # get '/@:username/music/:content_type', to: 'account_music#index', as: :short_account_music
 
   get  '/interact/:id', to: 'remote_interaction#new', as: :remote_interaction
   post '/interact/:id', to: 'remote_interaction#create'

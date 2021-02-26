@@ -6,14 +6,24 @@
 
 = render 'accounts/header', account: @account
 
+.h-feed
+  %data.p-name{ value: "#{@account.username} on #{site_hostname}" }/
+
+  .account__section-headline
+    = active_link_to "歌曲", short_account_url(@account)
+    = active_link_to "专辑", short_account_with_replies_url(@account)
+    = active_link_to "艺术家", short_account_media_url(@account)
+
+
+
 - if @account.user_hides_network?
   .nothing-here= t('accounts.network_hidden')
 - elsif user_signed_in? && @account.blocking?(current_account)
   .nothing-here= t('accounts.unavailable')
-- elsif @follows.empty?
+- elsif @rows.empty?
   = nothing_here
 - else
-  .card-grid
-    = render partial: 'application/card', collection: @follows.map(&:target_account), as: :account
-
-  = paginate @follows
+  .wrap{ style: "height: 20px" }
+  .card-grid{ style: "padding-top: 15px; background: #282c37;" }
+    = render partial: 'application/music', collection: @rows, as: :row
+  = paginate @rows

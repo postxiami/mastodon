@@ -14,78 +14,39 @@ class AccountMusicController < ApplicationController
     respond_to do |format|
       format.html do
         expires_in 0, public: true unless user_signed_in?
-
-        next if @account.user_hides_network?
-
-        follows
-      end
-
-      format.json do
-        raise Mastodon::NotPermittedError if page_requested? && @account.user_hides_network?
-
-        expires_in(page_requested? ? 0 : 3.minutes, public: public_fetch_mode?)
-
-        render json: collection_presenter,
-               serializer: ActivityPub::CollectionSerializer,
-               adapter: ActivityPub::Adapter,
-               content_type: 'application/activity+json',
-               fields: restrict_fields_to
+        rows
       end
     end
   end
 
   private
 
-  def follows
-    return @follows if defined?(@follows)
+  def rows
+    return @rows if defined?(@rows)
 
-    scope = Follow.where(account: @account)
-    scope = scope.where.not(target_account_id: current_account.excluded_from_timeline_account_ids) if user_signed_in?
-    @follows = scope.recent.page(params[:page]).per(FOLLOW_PER_PAGE).preload(:target_account)
-  end
+    account = current_account
+    if params[:content_type]
+      if params[:content_type] == 'song'
+        query = Track.joins("INNER JOIN collections ON collections.collectable_id = tracks.id AND ctype = 1 AND account_id = " + account[:id].to_s)
+      end
 
-  def page_requested?
-    params[:page].present?
-  end
+      if params[:content_type] == 'album'
+        query = Album.joins("INNER JOIN collections ON collections.collectable_id = albums.id AND ctype = 2 AND account_id = " + account[:id].to_s)
+      end
 
-  def page_url(page)
-    account_following_index_url(@account, page: page) unless page.nil?
-  end
-
-  def next_page_url
-    page_url(follows.next_page) if follows.respond_to?(:next_page)
-  end
-
-  def prev_page_url
-    page_url(follows.prev_page) if follows.respond_to?(:prev_page)
-  end
-
-  def collection_presenter
-    if page_requested?
-      ActivityPub::CollectionPresenter.new(
-        id: account_following_index_url(@account, page: params.fetch(:page, 1)),
-        type: :ordered,
-        size: @account.following_count,
-        items: follows.map { |f| ActivityPub::TagManager.instance.uri_for(f.target_account) },
-        part_of: account_following_index_url(@account),
-        next: next_page_url,
-        prev: prev_page_url
-      )
+      if params[:content_type] == 'artist'
+        query = Artist.joins("INNER JOIN collections ON collections.collectable_id = artists.id AND ctype = 3 AND account_id = " + account[:id].to_s)
+      end
     else
-      ActivityPub::CollectionPresenter.new(
-        id: account_following_index_url(@account),
-        type: :ordered,
-        size: @account.following_count,
-        first: page_url(1)
-      )
+      query = Album.joins("INNER JOIN collections ON collections.collectable_id = albums.id AND ctype = 2 AND account_id = " + account[:id].to_s)
     end
-  end
 
-  def restrict_fields_to
-    if page_requested? || !@account.user_hides_network?
-      # Return all fields
-    else
-      %i(id type totalItems)
+    @rows = []
+    if query
+      @rows = query.page(params[:page]).per(40)
     end
+    # scope = Follow.where(account: @account)
+    # scope = scope.where.not(target_account_id: current_account.excluded_from_timeline_account_ids) if user_signed_in?
+    # @rows = scope.recent.page(params[:page]).per(FOLLOW_PER_PAGE).preload(:target_account)
   end
 end

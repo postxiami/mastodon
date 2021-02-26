@@ -1,0 +1,7 @@
+
+.image-wall{ style: 'display: flex;flex-wrap: wrap;'}
+  .itemwrap{ style: ' flex-grow: 1;' }
+    = row[:cover] ? image_tag(row[:cover], alt: '',  width: 308, style: '') : ''
+    .card__bar
+      = "#{row[:name]}  -  #{row[:artist_name]}"
+
