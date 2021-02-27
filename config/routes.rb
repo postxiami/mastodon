@@ -80,7 +80,7 @@ Rails.application.routes.draw do
     resource :unfollow, only: [:create], controller: :account_unfollow
 
     resources :music, only: [:index], controller: :account_music
-    get 'music/:content_type', to: 'account_music#index'
+    get 'music/:content_type', to: 'account_music#index', as: :music_list
 
     resource :outbox, only: [:show], module: :activitypub
     resource :inbox, only: [:create], module: :activitypub

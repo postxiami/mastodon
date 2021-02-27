@@ -10,9 +10,9 @@
   %data.p-name{ value: "#{@account.username} on #{site_hostname}" }/
 
   .account__section-headline
-    = active_link_to "歌曲", short_account_url(@account)
-    = active_link_to "专辑", short_account_with_replies_url(@account)
-    = active_link_to "艺术家", short_account_media_url(@account)
+    = active_link_to "歌曲", account_music_list_url(@account, content_type: :song)
+    = active_link_to "专辑", account_music_list_url(@account, content_type: :album)
+    = active_link_to "艺术家", account_music_list_url(@account, content_type: :artist)
 
 
 

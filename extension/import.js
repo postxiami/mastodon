@@ -1,6 +1,6 @@
 
 const endpoint = 'http://localhost:3000'
-const token = 'xLaHyU-JaIz3rlfSIlGvDBVx234bT35IiXG7HHT_UVg'
+const token = "c84GdRg_R_lBcIvN0mdu296LL5HFOtnj4wHGihms87M";
 const instance = axios.create({
     baseURL: endpoint + '/api',
     timeout: 50000,
