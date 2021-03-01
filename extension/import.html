@@ -8,7 +8,7 @@
         <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
         <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-        <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script> -->
         <script src="https://cdn.jsdelivr.net/npm/ant-design-vue@1.7.2/dist/antd.min.js"></script>
         <!-- <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.min.js"></script> -->
         <script src="https://cdn.jsdelivr.net/npm/pouchdb@7.2.1/dist/pouchdb.min.js"></script>
@@ -165,360 +165,41 @@
     </head>
     
     <body>
-        <div class="slogn">
-            <img src="qrcode.png" style="vertical-align: middle; margin-right: 15px; margin-bottom: 10px;"
-                height="100" /><br>
-            <a target="_blank" href="https://github.com/xiami2021/backup"
-                style="color: #aaa;">github.com/xiami2021/backup</a>
-        </div>
         <div id="app" :class="{'appStarted': inited }">
             <div id="loading-mask">
                 <div class="loading-wrapper"><span class="loading-dot loading-dot-spin"><i></i><i></i><i></i><i></i></span>
                 </div>
             </div>
-    
-            <div class="" v-if="starting" style="text-align: center;">
-                <scale-loader class="loading" style="margin-top: 80px; margin-bottom: 10px" :loading="true" color="black">
-                </scale-loader>
-                <div>
-                    正在备份<br>
-                    <br>
-                </div>
-                <div>
-                    <p>如果一直在loading，请加上以下本地解析。<a
-                            href="https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&tn=baidu&wd=%E6%9C%AC%E5%9C%B0%E8%A7%A3%E6%9E%90"
-                            target="_blank">教程</a></p>
-                    <p>
-                    <pre style="color: white; background: black;">
-    
-    
-    203.119.169.158 h5api.m.xiami.com
-    
-                        </pre>
-                    </p>
-    
-                </div>
-    
-                <div id="logs" v-if="logs.length">
-                    <div v-for="log in logs" v-html="log" class="log-item"></div>
-                </div>
-            </div>
-            <a-modal v-model="showSub" title="歌单详情" :width="900">
-                <a-table bordered :columns="viewColumns" :data-source="viewSongs" :pagination="paginationProps">
-                    <div slot="imgcover" slot-scope="text,record">
-                        <img :src="text" width="100" />
-                        <!-- {{ text }} -->
-                    </div>
-                    <div slot="download" slot-scope="text,record">
-                        <a-button icon="download" @click="createTask(record.songs)">
-                            备份该歌单歌曲
-                        </a-button>
-                    </div>
-                    <div slot="subtable" slot-scope="text,record">
-                        <a-button @click="viewData(record.songs)">
-                            歌曲列表
-                        </a-button>
-                    </div>
-                    <div slot="html" class="custom-desc" slot-scope="text" v-html="text" style="width: 250px"></div>
-                    <pre slot="code" slot-scope="text" v-html="text" style="width: 450px"></pre>
-                </a-table>
-            </a-modal>
-            <a-modal v-model="showDownloader" title="虾米数据备份">
-                <!-- <p>{{ totalTask }}首</p> -->
-                <p>
-                    <a-input v-model="saveDir" placeholder="存储文件夹 如： F:\allsong" />
-                </p>
-                <p>
-                    <a-input v-model="user" placeholder="账号（提供有隐藏buff）" />
-                </p>
-                <p>
-                    <a-input type="password" v-model="pwd" placeholder="密码（提供有隐藏buff）" />
-                </p>
-                <p>
-                    <a-checkbox :checked="skipDown" @change="handleChange">
-                        不备份音频资源 (更快生成TAG云)
-                    </a-checkbox>
-                </p>
-                <p>
-                    <a-checkbox v-model="useMaxSize">
-                        备份最高质量音源
-                    </a-checkbox>
-                </p>
-                <!-- <div style="border-top: 1px solid #eee; padding-top: 20px">
-                                  <scale-loader class="loading" :loading="true" color="black" ></scale-loader>
-                                  准备导入歌单..
-                              </div> -->
-                <template slot="footer">
-                    <a-button type="primary" @click="startDownload" size="large" style="width: 140px;" icon="download">开始备份
-                    </a-button>
-                </template>
-                </a-card>
-            </a-modal>
 
       <div style="width: 500px; margin: 20px">
-
-        <a-card>
+        <a-card v-if="!token">
             <h2>连接账号</h2>
+                <p>
+                <a-input v-model="url" placeholder="" />
+            </p>
             <p>
-              <a-input v-model="url" placeholder="存储文件夹 如： F:\allsong" />
-          </p>
-          <p>
-              <a-input v-model="code" placeholder="授权代码" />
-          </p>
-          <a-button type="primary" @click="startDownload" size="large" style="width: 140px;" icon="download">获取授权码
-        </a-button>
+                <a-input v-model="code" placeholder="授权代码" />
+            </p>
+            <a-button type="primary" @click="startAuth" style="width: 140px;" icon="user">获取授权码
+            </a-button>
+        </a-card>
+
+        <div style="margin-top: 20px">
+            <a-upload
+                name="file"
+                :custom-request="customRequest"
+            >
+                <a-button>导入JSON（xiami2021/backup备份的）</a-button>
+            </a-upload>
+            {{ tabs }}
+          </div>
+         </div>
       </div>
 
-      <div>
-        <a-upload
-            name="file"
-            :custom-request="customRequest"
-            @change="handleChange"
-        >
-            <a-button> 打开JSON </a-button>
-        </a-upload>
-
-        <a-button @click="startImport"> 准备导入 </a-button>
-      </div>
-    
-            <a-modal v-model="statusBox" :width="700" :footer="null">
-                <a-card title="备份状态" :bordered="true" v-if="currentStatus">
-                    <div slot="extra">
-                        <!-- {{runErrors.length}} -->
-                        <a href="https://pensive-nightingale-29632c.netlify.app/" target="_blank">
-                            <a-button>风格标签云</a-button>
-                        </a>
-                        <!-- <a-button @click="showGenre">下载数据</a-button> -->
-                        <a-button @click="showError" v-if="runErrors.length">错误{{runErrors.length}}</a-button>
-                    </div>
-                    <p v-if="currentStatus.status.doneTotal == 0 && currentStatus.status.undone == 0">
-                        暂无备份任务，点击【备份所有收藏歌曲】或【备份该歌单歌曲】开始
-                    </p>
-                    <a-row :gutter="16">
-                        <a-col :span="6">
-                            <a-statistic title="速度" :value="currentStatus.status.currentSpeed" style="margin-right: 50px">
-                            </a-statistic>
-                        </a-col>
-                        <a-col :span="6">
-                            <a-statistic title="完成" :value="currentStatus.status.doneTotal" class="demo-class">
-                            </a-statistic>
-                        </a-col>
-                        <a-col :span="6">
-                            <a-statistic title="剩余" :value="currentStatus.status.undone" class="demo-class"> </a-statistic>
-                        </a-col>
-                        <a-col :span="6">
-                            <a-statistic title="下架" :value="currentStatus.status.failedTotal" class="demo-class">
-                            </a-statistic>
-                        </a-col>
-                    </a-row>
-    
-    
-                    <div style="
-                        border-top: 1px solid #eee;
-                        padding-top: 10px;
-                        margin-top: 20px;
-                    ">
-                        <h3>最新备份</h3>
-                        <a-list item-layout="horizontal" :data-source="currentStatus.status.doneTasks">
-                            <a-list-item slot="renderItem" slot-scope="item">
-                                <a-list-item-meta :description="item.artist_name">
-                                    <a slot="title" target="_blank">{{ item.song_name }}</a>
-                                    <img slot="avatar" :src="item.album_logo" height="55" />
-                                </a-list-item-meta>
-                            </a-list-item>
-                        </a-list>
-                    </div>
-                    <div style="
-                        border-top: 1px solid #eee;
-                        padding-top: 10px;
-                        margin-top: 20px;
-                    ">
-                        <h3>备份失败</h3>
-                        <a-list item-layout="horizontal" :data-source="currentStatus.status.failed.slice(0, 50)">
-                            <a-list-item slot="renderItem" slot-scope="item">
-                                <a-list-item-meta :description="item.artist_name">
-                                    <a slot="title" target="_blank">{{ item.song_name }} - {{ item.song_id }}</a>
-                                    <img slot="avatar" :src="item.album_logo" height="55" />
-                                </a-list-item-meta>
-                            </a-list-item>
-                        </a-list>
-                    </div>
-                </a-card>
-            </a-modal>
-            <a-layout>
-                <a-layout-content>
-                    <a-row>
-                        <!-- <a-button icon="reload" v-if="dataTabs.length" @click="startBackup()"
-                            style="margin-top: 10px; margin-bottom: 10px; margin-left: 10px;">
-                            打开文件
-                        </a-button> -->
-                        <a-button icon="reload" v-if="dataTabs.length" @click="startBackup()"
-                            style="margin-top: 10px; margin-bottom: 10px; margin-left: 10px;">
-                            重新备份
-                        </a-button>
-                        <a-button icon="file" v-if="dataTabs.length" @click="saveFile"
-                            style="margin-top: 10px; margin-bottom: 10px; margin-left: 10px;">下载数据</a-button>
-                        <!-- <a-button v-if="dataTabs.length" @click="saveFile(true)" style="margin-top: 10px; margin-bottom: 10px; margin-left: 10px;">
-                                下载数据(Excel)</a-button> -->
-                        <a-button icon="download" v-if="dataTabs.length" style=" margin-left: 10px"
-                            @click="createTask(userData.song)">
-                            备份所有收藏歌曲
-                        </a-button>
-                        <a-button
-                            v-if="dataTabs.length && currentStatus != null && !currentStatus.isStart && saveDir != null"
-                            style=" margin-left: 10px" type="primary" @click="startTask">
-                            启动备份器
-                        </a-button>
-                        <!-- {{currentStatus}} -->
-                        <a-button icon="info-circle" v-if="dataTabs.length" @click="statusBox = true"
-                            style="margin-top: 10px; margin-bottom: 10px; margin-left: 10px;">备份状态
-                        </a-button>
-                        <a :href="'http://images.gravesinair.com/vis/index.html?v=1111111&uid='+userId"
-                            v-if="dataTabs.length" target="_blank" style=" margin-left: 10px">
-                            <a-button icon="bulb">数据可视化</a-button>
-                        </a>
-    
-                        <a-tabs v-if="dataTabs.length">
-                            <a-tab-pane :key="dataTab.type" :tab="`${dataTab.name} (${dataTab.total})`"
-                                v-for="dataTab in dataTabs">
-                                <a-table bordered :columns="dataTab.columns" :data-source="dataTab.data"
-                                    :pagination="paginationProps">
-                                    <div slot="imgcover" slot-scope="text,record">
-                                        <img :src="text" width="100" />
-                                        <!-- {{ text }} -->
-                                    </div>
-                                    <div slot="download" slot-scope="text,record">
-                                        <a-button icon="download" @click="createTask(record.songs)">
-                                            备份该歌单歌曲
-                                        </a-button>
-                                    </div>
-                                    <div slot="subtable" slot-scope="text,record">
-                                        <a-button @click="viewData(record.songs)">
-                                            歌曲列表
-                                        </a-button>
-                                    </div>
-                                    <div slot="html" class="custom-desc" slot-scope="text" v-html="text"
-                                        style="width: 250px"></div>
-                                    <pre slot="code" slot-scope="text" v-html="text" style="width: 450px"></pre>
-                                </a-table>
-                            </a-tab-pane>
-                        </a-tabs>
-                    </a-row>
-    
-                </a-layout-content>
-            </a-layout>
-            <!-- userData -->
-            <!-- <div id="chartdiv"></div> -->
-            <!-- <div style="text-align: left; margin-top: 10px; padding: 10px 20px; background: #f4f4f4;">
-                    <img src="qrcode.png" style="vertical-align: middle; margin-right: 15px;" height="100" />
-                    <span>备份虾米数据<br>
-                        生成虾米音乐收藏歌曲Tag云</span>
-                </div> -->
-        </div>
+  
         <script>
             var dataDB = new PouchDB('dataset');
             var ScaleLoader = VueSpinner.ScaleLoader
-    
-            var methods = {
-                fav: 'mtop.alimusic.fav.favoriteservice.getfavorites'
-            };
-    
-            const api = axios.create({
-                baseURL: "http://localhost:8765",
-                timeout: 60000,
-            });
-    
-            function rpcCall(method, args, needToken = false) {
-                return axios.get('http://localhost:8765/api/callAPI', {
-                    params: {
-                        action: JSON.stringify({
-                            method: method,
-                            needToken: needToken,
-                            args: args
-                        })
-                    }
-                })
-            }
-    
-            // var avaiableMethod = [];
-            // for (var t in allMethods) { 
-            //     var method = allMethods[t];
-            //     var res = await rpcCall(
-            //         method, {
-            //     }, false);
-    
-            //     if(res.data.result.ret[0].indexOf('FAIL_SYS_API_NOT_FOUNDED') > -1) {
-            //         console.log(method, res.data.result.ret[0])
-            //     } else {
-            //         avaiableMethod.push({
-            //             method: method,
-            //             name: t
-            //         })
-            //     }
-            // }
-            
-            async function getUserCollect(userId, pager = {}) {
-                const { data } = await rpcCall(
-                    'mtop.alimusic.music.list.collectservice.getcollectbyuser', {
-                    userId: userId,
-                    pagingVO: {
-                        page: pager.page || 1,
-                        pageSize: pager.limit || 100
-                    }
-                }, false);
-                if (!data.result.data.data) {
-                    throw new Error(data.result.ret[0]);
-                }
-                return data.result.data.data;
-            }
-    
-            async function getCollectDetail(userId, pager = {}) {
-                    const { data } = await rpcCall(
-                        'mtop.alimusic.music.list.collectservice.getcollectdetail', {
-                        listId: userId,
-                        isFullTags: false,
-                        pagingVO: {
-                            page: pager.page || 1,
-                            pageSize: pager.limit || 100
-                        }
-                    }, false);
-                    if (!data.result.data.data) {
-                        throw new Error(data.result.ret[0]);
-                    }
-                    return data.result.data.data;
-            }
-    
-            // mtop.alimusic.music.list.collectservice.getcollectdetail
-    
-            async function getUserFavorite(userId, type = 'song', pager = {}) {
-                const typeMappings = {
-                    'song': 1,
-                    'album': 2,
-                    'artist': 3,
-                    'mv': 4,
-                    'collect': 5
-                }
-    
-                if (type == 'create_collect') {
-                    return await getUserCollect(userId, pager)
-                }
-    
-                if (!typeMappings[type]) {
-                    throw new Error('not support ' + type);
-                }
-                const { data } = await rpcCall(methods.fav, {
-                    userId: userId,
-                    type: typeMappings[type],
-                    pagingVO: {
-                        page: pager.page || 1,
-                        pageSize: pager.limit || 100
-                    }
-                }, false);
-                if (!data.result.data.data) {
-                    throw new Error(data.result.ret[0]);
-                }
-                return data.result.data.data;
-            }
     
             const chunk = (arr, size) =>
                 Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
@@ -551,205 +232,51 @@
                     }
                 }
             }
-    
-            async function getAllFavorites(userId, type = 'song', conCount = 10) {
-                var firstData = await getUserFavorite(userId, type);
-                var allPageData = [];
-                allPageData.push(firstData);
-                if (firstData.pagingVO) {
-                    var allPages = [];
-                    var totalPage = parseInt(firstData.pagingVO.pages);
-                    for (let index = 2; index <= totalPage; index++) {
-                        allPages.push(index);
-                    }
-                    var allData = [];
-                    await chunkPromise(allPages, function (page) {
-                        // return new Promise(function(resolve, reject) {
-                        //     // getUserFavorite(userId, type, {
-                        //     //     page: page
-                        //     // }).then(function(rows) {
-                        //     //     resolve(rows)
-                        //     // });
-                        // })
-                        return Promise.retry(5, (resolve, reject) => {
-                            getUserFavorite(userId, type, {
-                                page: page
-                            }).then(function (rows) {
-                                resolve(rows)
-                            }).catch(reject);
-                        })
-                    }, rows => {
-                        console.log('rows', rows)
-                        rows.forEach(_ => {
-                            allPageData.push(_);
-                        })
-                    }, conCount)
+
+           function MastdonApi(url) {
+                var _clientData = null
+                async function getMastodonClientId() {
+                    if(_clientData) return _clientData;
+                    const { data } = await axios.post(url+'/api/v1/apps', {
+                        client_name: '音乐数据导入工具',
+                        redirect_uris: 'urn:ietf:wg:oauth:2.0:oob',
+                        scopes: 'read write',
+                        website: ''
+                    });
+                    _clientData = data;
+                    return data
                 }
-    
-                const structedData = [];
-                allPageData.forEach(pageData => {
-                    const dataKey = type == 'create_collect' ? 'collect' : type
-                    const dataRows = pageData[`${dataKey}s`];
-                    if (!dataRows) return;
-                    dataRows.forEach(rowItem => {
-                        structedData.push(rowItem);
+                
+                async function getCode() {
+                    var clientData = await getMastodonClientId();
+                    var authUrl = url + '/oauth/authorize?client_id='+clientData['client_id']+'&redirect_uri='+ clientData['redirect_uri'] +'&response_type=code&scope=read+write'
+                    window.open(authUrl)
+                }
+
+                async function tryRetriveToken(code) {
+                    var tokenAPi = url + '/oauth/token';
+                    var clientData = await getMastodonClientId();
+                    const { data } = await axios.post(tokenAPi, {
+                        client_id: clientData['client_id'],
+                        client_secret: clientData['client_secret'],
+                        redirect_uri: clientData['redirect_uri'],
+                        grant_type: 'authorization_code',
+                        code: code
                     })
-                })
-                // console.log("structedData", structedData);
-                return structedData;
-            }
-    
-            async function getUserAllFavorites(userId) {
-                const allData = {};
-                const startTime = Date.now()
-                const allTypes = ['song', 'album', 'artist', 'collect', 'create_collect'];
-                for (let index = 0; index < allTypes.length; index++) {
-                    const type = allTypes[index];
-                    try {
-                        console.log('fetch', type)
-                        const typeData = await getAllFavorites(userId, type)
-                        allData[type] = typeData
-                    } catch (e) {
-                        console.log('error' + type, e)
-                    }
+                    return data;
                 }
-    
-                console.log('allData', allData)
-                var serizeData = {};
-                try {
-                    if (allData.collect) {
-                        allData.collect = await drillDownCollect(allData.collect)
-                    }
-                    if (allData.create_collect) {
-                        allData.create_collect = await drillDownCollect(allData.create_collect)
-                    }
-                    if (allData.collect) {
-                        serizeData.collect = allData.collect.map(_ => toSimple('collect', _))
-                    }
-                    if (allData.create_collect) {
-                        serizeData.create_collect = allData.create_collect.map(_ => toSimple('collect', _))
-                    }
-                } catch (e) {
-                    console.log('process', e)
+
+                return {
+                    getMastodonClientId: getMastodonClientId,
+                    getCode: getCode,
+                    tryRetriveToken: tryRetriveToken
                 }
-    
-                if (allData.album) {
-                    serizeData.album = allData.album.map(_ => toSimple('album', _))
-                }
-    
-                if (allData.song) {
-                    serizeData.song = allData.song.map(_ => toSimple('song', _))
-                }
-    
-                if (allData.artist) {
-                    serizeData.artist = allData.artist.map(_ => toSimple('artist', _))
-                }
-                // toSimple
-                console.log('spendTime', (Date.now() - startTime) / 1000, 'second', allData)
-                return serizeData
-            }
-    
-            async function getAlbumDetail(albumId) {
-                const { data } = await rpcCall(
-                    'mtop.alimusic.music.albumservice.getalbumdetail', {
-                    albumId: albumId
-                }, false);
-                if (!data.result.data.data) {
-                    throw new Error(data.result.ret[0]);
-                }
-                return data.result.data.data;
-            }
-    
-            async function getArtistDetail(objectId) {
-                const { data } = await rpcCall(
-                    'mtop.alimusic.music.artistservice.getartistdetail', {
-                    artistId: objectId
-                }, true);
-                if (!data.result.data.data) {
-                    throw new Error(data.result.ret[0]);
-                }
-                return data.result.data.data;
-            }
-    
-    
-    
-            async function getArtistAlbums(objectId, pager = {}) {
-                const { data } = await rpcCall(
-                    'mtop.alimusic.music.albumservice.getartistalbums', {
-                    artistId: objectId,
-                    pagingVO: {
-                        page: 1,
-                        pageSize: 100
-                    }
-                }, false);
-                if (!data.result.data.data) {
-                    throw new Error(data.result.ret[0]);
-                }
-                return data.result.data.data;
-            }
-    
-            async function getSongDetail(songId) {
-                const { data } = await rpcCall(
-                    'mtop.alimusic.music.songservice.getsongdetail', {
-                    songId: songId
-                }, false);
-                if (!data.result.data.data) {
-                    throw new Error(data.result.data.ret[0]);
-                }
-                return data.result.data.data;
-            }
-    
-            async function getCollectSongs(id) {
-                var firstData = await getCollectDetail(id);
-                var allPageData = [];
-                var rows = [];
-                allPageData.push(firstData);
-                if (firstData.pagingVO) {
-                    var allPages = [];
-                    var totalPage = parseInt(firstData.pagingVO.pages);
-                    for (let index = 2; index <= totalPage; index++) {
-                        allPages.push(index);
-                    }
-                    var allData = [];
-                    await chunkPromise(allPages, function (page) {
-                        // return new Promise(function(resolve, reject) {
-                        //     // getUserFavorite(userId, type, {
-                        //     //     page: page
-                        //     // }).then(function(rows) {
-                        //     //     resolve(rows)
-                        //     // });
-                        // })
-                        return Promise.retry(5, (resolve, reject) => {
-                            getCollectDetail(id, {
-                                page: page
-                            }).then(function (rows) {
-                                resolve(rows)
-                            }).catch(reject);
-                        })
-                    }, rows => {
-                        console.log('rows', rows)
-                        rows.forEach(_ => {
-                            firstData.collectDetail.songs = firstData.collectDetail.songs.concat(_.collectDetail.songs)
-                            allPageData.push(_);
-                        })
-                    }, 3)
-                }
-                console.log(firstData)
-                return firstData.collectDetail
-                // const { data } = await axios.get('http://localhost:8765/api/getCollectSongs', {
-                //     params: {
-                //         listId: id
-                //     }
-                // })
-                // if (data.error) {
-                //     throw new Error('failed' + data.error)
-                // }
-    
-                // if (!data.result.resultObj) {
-                //     throw new Error('failed')
-                // }
-                // return data.result.resultObj
-            }
+           }
+
+
+           var apiinst = new MastdonApi('https://postxiami.space/');
+
+        //    await apiinst.getCode()''
     
     
             Object.defineProperty(Promise, 'retry', {
@@ -769,163 +296,6 @@
             })
     
     
-            async function drillDownCollect(collects, conCount = 10) {
-                const structedData = [];
-                await chunkPromise(collects, function (collectItem) {
-                    // return new Promise(function(resolve, reject) {
-                    //     console.log(collectItem)
-                    //     Promise.retry(5, (resolve, reject) => {
-                    //         getCollectSongs(collectItem.listId).then(function(rows) {
-                    //             resolve(rows)
-                    //         }).catch(reject);
-                    //     })
-                    //     // retryPromise(getCollectSongs, [collectItem.listId], 3,  null).then(function(rows) {
-                    //     //     resolve(rows)
-                    //     // });
-                    //     // getCollectSongs(collectItem.listId).then(function(rows) {
-                    //     //     resolve(rows)
-                    //     // });
-                    // })
-                    return Promise.retry(5, (resolve, reject) => {
-                        getCollectSongs(collectItem.listId).then(function (rows) {
-                            resolve(rows)
-                        }).catch(reject);
-                    })
-                }, rows => {
-                    rows.forEach(rowItem => {
-                        structedData.push(rowItem);
-                    })
-                }, conCount);
-                console.log('get', collects.length, 'parsed', structedData.length)
-                return structedData;
-            }
-    
-            function toSimple(type = 'song', raw) {
-                if (type === 'song') {
-                    return {
-                        album_logo: raw.albumLogo,
-                        album_id: raw.albumId,
-                        artist_logo: raw.artistLogo,
-                        artist_id: raw.artistId,
-                        album_name: raw.albumName,
-                        artist_name: raw.artistName,
-                        artist_alias: raw.artistAlias,
-                        artists: raw.artistVOs && raw.artistVOs.map(_ => {
-                            return {
-                                name: _.artistName,
-                                id: _.artistId,
-                                alias: _.alias
-                            }
-                        }),
-                        song_name: raw.songName,
-                        song_id: raw.songId,
-                        song_writes: raw.songwriters
-                    }
-                }
-    
-                if (type === 'album') {
-                    return {
-                        album_id: raw.albumId,
-                        album_logo: raw.albumLogo,
-                        company: raw.company,
-                        language: raw.language,
-                        play_count: raw.playCount,
-                        recommends: raw.recommends,
-                        album_category: raw.albumCategory,
-                        publish: raw.gmtPublish,
-                        album_name: raw.albumName,
-                        artist_name: raw.artistName,
-                        artist_id: raw.artistId,
-                        artists: raw.artists.map(_ => {
-                            return {
-                                comments: _.comments,
-                                description: _.description,
-                                area: _.area,
-                                name: _.artistName,
-                                id: _.artistId,
-                                alias: _.alias
-                            }
-                        }),
-                    }
-                }
-    
-                if (type === 'artist') {
-                    return {
-                        artist_logo: raw.artistLogo,
-                        alias: raw.alias,
-                        artist_id: raw.artistId,
-                        artist_name: raw.artistName,
-                        area: raw.area,
-                        comments: raw.comments,
-                        likes: raw.countLikes,
-                        gender: raw.gender,
-                        play_count: raw.playCount,
-                        recommends: raw.recommends,
-                        roles: raw.roles && raw.roles.map(_ => _.name),
-                        styles: raw.styles && raw.styles.map(_ => _.styleName),
-                    }
-                }
-    
-                if (type === 'collect') {
-                    return {
-                        id: raw.listId,
-                        collect_logo: raw.collectLogo,
-                        name: raw.collectName,
-                        description: raw.description,
-    
-                        collects: raw.collects,
-                        comments: raw.comments,
-                        play_count: raw.playCount,
-                        views: raw.views,
-    
-                        gmt_create: raw.gmtCreate,
-                        gmt_modify: raw.gmtModify,
-                        song_count: raw.songCount,
-                        songs: raw.songs && raw.songs.map(_ => {
-                            return {
-                                song_id: _.songId,
-                                description: _.description,
-                                album_id: _.albumId,
-                                language: _.albumLanguage,
-                                album_name: _.albumName,
-                                artist_name: _.artistName,
-                                composer: _.composer,
-                                arrangement: _.arrangement,
-                                song_name: _.songName,
-                                songwriters: _.songwriters,
-                                singers: _.singers,
-                            }
-                        }),
-    
-                        author: raw.userName,
-                        avatar: raw.user && raw.user.avatar,
-                    }
-                }
-            }
-    
-    
-            async function creatCache(id) {
-                const { data } = await axios.post('http://localhost:8765/api/cache/create', {
-                    data: {
-                        rows: [
-                            {
-                                object_id: 1,
-                                type: 'favorite',
-                                raw: JSON.stringify()
-                            }
-                        ]
-                    }
-                })
-                if (data.error) {
-                    throw new Error('failed' + data.error)
-                }
-    
-                if (!data.result.resultObj) {
-                    throw new Error('failed')
-                }
-                return data.result.resultObj
-            }
-    
             function download(text, name, type) {
                 var file = new Blob([text], { type: type });
                 var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -940,168 +310,522 @@
                 }
             }
     
+            // var app = new Vue({
+            //     el: '#app',
+            //     components: {
+            //         ScaleLoader: ScaleLoader
+            //     },
+            //     data: {
+            //         url: 'https://postxiami.space',
+            //         code: null,
+            //         viewColumns: [
+            //             // song_id: _.songId,
+            //             //     description: _.description,
+            //             //     album_id: _.albumId,
+            //             //     language: _.albumLanguage,
+            //             //     album_name: _.albumName,
+            //             //     artist_name: _.artistName,
+            //             //     composer: _.composer,
+            //             //     arrangement: _.arrangement,
+            //             //     song_name: _.songName,
+            //             //     songwriters: _.songwriters,
+            //             //     singers: _.singers,
+            //             {
+            //                 title: 'song_name',
+            //                 dataIndex: 'song_name'
+            //             },
+            //             {
+            //                 title: 'artist_name',
+            //                 dataIndex: 'artist_name'
+            //             }, {
+            //                 title: 'album_name',
+            //                 dataIndex: 'album_name'
+            //             },
+            //             {
+            //                 title: 'description',
+            //                 dataIndex: 'description'
+            //             },
+            //             {
+            //                 title: 'composer',
+            //                 dataIndex: 'composer'
+            //             }
+            //         ],
+            //         userId: null,
+            //         viewSongs: [],
+            //         runErrors: [],
+            //         statusBox: false,
+            //         useMaxSize: false,
+            //         skipDown: false,
+            //         saveDir: null,
+            //         user: null,
+            //         showSub: false,
+            //         pwd: null,
+            //         currentPage: 1,
+            //         showDownloader: false,
+            //         currentStatus: null,
+            //         starting: false,
+            //         inited: false,
+            //         loading: true,
+            //         userData: null,
+            //         songs: null,
+            //         logs: [],
+            //         topStyles: [],
+            //         dataTabs: [],
+            //         downloadSongs: null,
+            //     },
+            //     mounted() {
+            //         this.loading = false;
+            //         this.inited = true;
+            //         // this.saveDir = window.localStorage.getItem('saveDir')
+            //         // this.user = window.localStorage.getItem('user')
+            //         // this.pwd = window.localStorage.getItem('pwd')
+            //         // this.useMaxSize = window.localStorage.getItem('useMaxSize') ? true : false;
+            //         // let params = (new URL(document.location)).searchParams;
+            //         // let uid = params.get("uid");
+            //         // if (isNaN(parseInt(uid))) {
+            //         //     alert('https://www.xiami.com/user/{这一段是你的ID}， 或者打开虾米app最底部有段数字');
+            //         //     return;
+            //         // }
+            //         // this.init(uid)
+            //         // if (this.saveDir) {
+            //         //     // this.startTask();
+            //         // }
+            //         // window.progress = (log) => {
+            //         //     log.results = Object.keys(log.results)
+            //         //     this.logs.unshift(log);
+            //         //     if (this.logs.length > 20) {
+            //         //         this.logs.pop();
+            //         //     }
+            //         // }
+            //         // this.loadStatus();
+            //         // this.timer = setInterval(() => {
+            //         //     this.loadStatus();
+            //         // }, 3000);
+            //     },
+            //     computed: {
+            //         paginationProps() {
+            //             return {
+            //                 showSizeChanger: true,
+            //                 current: this.currentPage,
+            //                 pageSizeOptions: ['25', '96', '200', '800'],
+            //                 defaultPageSize: 25,
+            //                 showTotal: total => `全部 ${total} 结果`,
+            //                 onChange: (page, pageSize) => {
+            //                     this.currentPage = page
+            //                     console.log(page, pageSize)
+            //                     this.goTop();
+            //                 }
+            //             }
+            //         }
+            //     },
+            //     watch: {
+            //         useMaxSize() {
+            //             window.localStorage.setItem('useMaxSize', this.useMaxSize)
+            //         },
+            //         saveDir() {
+            //             window.localStorage.setItem('saveDir', this.saveDir)
+            //         },
+            //         user() {
+            //             window.localStorage.setItem('user', this.user)
+            //         },
+            //         pwd() {
+            //             window.localStorage.setItem('pwd', this.pwd)
+            //         }
+            //     },
+            //     methods: {
+            //         showError() {
+            //             this.$info({
+            //                 title: '错误内容',
+            //                 content: JSON.stringify(this.runErrors, null, 2)
+            //             });
+            //         },
+            //         //  async createTask() {
+            //         //     const { data } = await api.get('/downloader/create', {
+            //         //     })
+            //         //     this.totalTask = data.task.length;
+            //         //     return data;
+            //         // },
+            //         async startImport() {
+            //             const allSongs = this.userData;
+            //             console.log('allSongs', allSongs)
+            //         },
+            //         async startTask() {
+            //             try {
+            //                 var taskP = {
+            //                     // skipDownload: 1,
+            //                     saveDir: this.saveDir,
+            //                     user: this.user,
+            //                     pwd: this.pwd
+            //                 }
+    
+            //                 if (this.skipDown) {
+            //                     taskP.skipDownload = 1;
+            //                 }
+    
+            //                 taskP.useMaxSize = this.useMaxSize;
+            //                 const { data } = await api.get('/downloader/start', {
+            //                     params: taskP
+            //                 })
+            //                 if (data.error) {
+            //                     alert(data.error)
+            //                 }
+            //             } catch (e) {
+            //                 alert('start error=' + e.toString());
+            //             }
+            //         },
+            //         async customRequest(options) {
+            //             const toText = file => new Promise((resolve, reject) => {
+            //                 const reader = new FileReader();
+            //                 reader.readAsText(file);
+            //                 reader.onload = () => resolve(reader.result);
+            //                 reader.onerror = error => reject(error);
+            //             });
+            //             const dataText = await toText(options.file);
+            //             this.userData = JSON.parse(dataText)
+            //             console.log('this.userData', this.userData )
+            //             options.onSuccess({
+
+            //             }, options.file)
+            //         },
+            //         async startDownload() {
+            //             if (!this.saveDir) {
+            //                 this.$info({
+            //                     title: '提示',
+            //                     content: '存储文件夹不能为空, 账号、密码'
+            //                 });
+            //                 return;
+            //             }
+            //             const stepData = chunk(this.downloadSongs, 5000);
+            //             console.log('data', stepData)
+            //             for (let index = 0; index < stepData.length; index++) {
+            //                 const stepDataRows = stepData[index];
+            //                 console.log('stepDataRows', stepDataRows)
+            //                 const { data } = await api.post('/downloader/create', {
+            //                     songIds: stepDataRows.map(_ => _.song_id)
+            //                 })
+            //             }
+            //             // this.totalTask = data.task.length;
+            //             this.startTask();
+            //             this.downloading = true;
+            //             this.showDownloader = false;
+            //             this.statusBox = true;
+            //         },
+    
+            //         async loadStatus() {
+            //             const { data } = await api.get('/downloader/status')
+            //             this.currentStatus = data;
+            //             this.runErrors = data.status.runErrors;
+            //             this.recentTasks = data.status.doneTasks.reverse().slice(0, 50)
+            //         },
+    
+            //         handleChange(e) {
+            //             this.skipDown = e.target.checked;
+            //         },
+            //         createTask(data) {
+            //             this.downloadSongs = data;
+            //             console.log('downloadSongs', this.downloadSongs)
+            //             this.showDownloader = true
+            //         },
+            //         saveFile() {
+            //             // console.log(this.userData)
+            //             download(JSON.stringify(this.userData), 'backup.json', 'application/json');
+            //         },
+            //         goTop() {
+            //             document.body.scrollTop = 0
+            //         },
+    
+            //         viewData(songs) {
+            //             this.viewSongs = songs
+            //             this.showSub = true;
+            //         },
+            //         async init(uid) {
+    
+            //             this.userId = uid
+            //             try {
+            //                 const eDoc = await dataDB.get('state_' + uid)
+            //                 console.log('eDoc', eDoc);
+            //                 if (eDoc.state && Object.keys(eDoc.state).length > 2) {
+            //                     this.vis(eDoc.state)
+            //                 } else {
+            //                     alert('数据错误，准备重新导出')
+            //                     throw new Error('data error')
+            //                 }
+            //             } catch (e) {
+            //                 console.log(e);
+            //                 this.startBackup(uid)
+            //             }
+            //         },
+    
+            //         vis(userData) {
+            //             this.userData = userData
+            //             this.dataTabs = Object.keys(userData).map(_ => {
+            //                 if (userData[_].length == 0) return null;
+    
+            //                 const allColumns = Object.keys(userData[_][0]).map(c => {
+            //                     var cloudConfig = {
+            //                         title: c,
+            //                         dataIndex: c
+            //                     }
+            //                     if (['album_logo', 'collect_logo', 'artist_logo', 'avatar'].indexOf(c) > -1) {
+            //                         cloudConfig.scopedSlots = {
+            //                             customRender: 'imgcover'
+            //                         }
+            //                     }
+    
+            //                     if ([
+            //                         'views',
+            //                         'collects',
+            //                         'likes',
+            //                         'play_count',
+            //                         'recommends',
+            //                         'comments'].indexOf(c) > -1) {
+            //                         cloudConfig.sorter = (a, b) => {
+            //                             // console.log('sort', a, b)
+            //                             return a[c] - b[c]
+            //                         };
+            //                     }
+    
+    
+            //                     // scopedSlots: { customRender: 'imgcover' },
+            //                     return cloudConfig
+            //                 });
+    
+            //                 if (_.indexOf('collect') > -1) {
+            //                     allColumns.unshift({
+            //                         title: '操作',
+            //                         dataIndex: 'action',
+            //                         scopedSlots: {
+            //                             customRender: 'download'
+            //                         }
+            //                     });
+            //                     allColumns.unshift({
+            //                         title: 'songs',
+            //                         dataIndex: _,
+            //                         scopedSlots: {
+            //                             customRender: 'subtable'
+            //                         }
+            //                     });
+            //                 }
+    
+    
+    
+            //                 // download
+            //                 return {
+            //                     name: _,
+            //                     type: _,
+            //                     columns: allColumns,
+            //                     total: userData[_].length,
+            //                     data: userData[_]
+            //                 }
+            //             }).filter(_ => _);
+            //         },
+            //         async startBackup(uid) {
+    
+            //             if (!uid) {
+            //                 let params = (new URL(document.location)).searchParams;
+            //                 uid = params.get("uid");
+            //                 // this.init(uid)
+            //             }
+            //             console.log('startBackup', uid)
+            //             this.starting = true
+            //             let userData = null
+            //             this.userId = uid
+            //             try {
+            //                 userData = await getUserAllFavorites(uid);
+            //                 console.log('userData', userData)
+            //             } catch (e) {
+            //                 alert(e.toString())
+            //                 return;
+            //             }
+    
+            //             this.starting = false;
+            //             // await dataDB.put()
+            //             var stateDoc = 'state_' + uid;
+            //             try {
+            //                 const eDoc = await dataDB.get(stateDoc)
+            //                 eDoc.state = userData
+            //                 eDoc.time = Date.now()
+            //                 await dataDB.put(eDoc)
+            //             } catch (e) {
+            //                 console.log('update failed try create')
+            //                 await dataDB.put({
+            //                     _id: stateDoc,
+            //                     state: userData,
+            //                     time: Date.now()
+            //                 })
+            //             }
+    
+            //             this.vis(userData);
+    
+            //         }
+            //     },
+            // })
+
+
+// function MastodonWriteApi(endpoint, token) {
+//     // const endpoint = 'http://localhost:3000'
+//     // const token = 'xLaHyU-JaIz3rlfSIlGvDBVx234bT35IiXG7HHT_UVg'
+//     const instance = axios.create({
+//         baseURL: endpoint + '/api',
+//         timeout: 50000,
+//         headers: {'Authorization': 'Bearer '+token}
+//     });
+//     return instance;
+// }
+
+
+function DataImporter(endpoint, token) {
+    const instance = axios.create({
+        baseURL: endpoint + '/api',
+        timeout: 50000,
+        headers: {'Authorization': 'Bearer '+token.access_token}
+    });
+
+    async function importData(type, rows) {
+        var payload = {}
+        payload[type] = rows
+        const { data } = await instance.post(`/v1/music/collections`, payload);
+        console.log(data)
+    }
+
+
+    async function importFromJson(type, rows) {
+        var dateTypeMap = {
+            song: 'songs',
+            album: 'albums',
+            artist: 'artists'
+        }
+
+        var dateType = dateTypeMap[type]
+        var parsedSongs = rows.map(_ => {
+            if(type == 'song') {
+                return {
+                    name: _.song_name,
+                    artist_name: _.artist_name,
+                    album_name: _.album_name,
+                    cover: _.album_logo
+                }
+            }
+
+            if(type == 'album') {
+                return {
+                    name: _.album_name,
+                    artist_name: _.artist_name,
+                    cover: _.album_logo,
+                    company: _.company,
+                    play_count: _.play_count,
+                    published_at: _.publish
+                }
+            }
+
+            if(type == 'artist') {
+                return {
+                    name: _.artist_name,
+                    cover: _.artist_logo,
+                    gender: _.gender,
+                    alias: _.alias,
+                    play_count: _.play_count,
+                    country: _.area
+                }
+            }
+        });
+
+        const stepItems = chunk(parsedSongs, 300);
+        for (let index = 0; index < stepItems.length; index++) {
+            try {
+                const tasks = stepItems[index];
+                const results = await importData(dateType, tasks)
+            } catch (e) {
+                console.log("chunkPromise", e);
+            }
+        }
+        console.log('all done')
+    }
+
+    async function importAll() {
+        var allDataTypes = ['artist', 'album', 'song'];
+        for(var k in allDataTypes) {
+            const type = allDataTypes[k]
+            const rows = app.userData[type]
+            await importFromJson(type, rows)
+        }
+    }
+
+    return {
+        importAll: importAll
+    }
+}
+
             var app = new Vue({
                 el: '#app',
                 components: {
                     ScaleLoader: ScaleLoader
                 },
                 data: {
-                    url: '',
+                    url: 'https://postxiami.space',
                     code: null,
-                    viewColumns: [
-                        // song_id: _.songId,
-                        //     description: _.description,
-                        //     album_id: _.albumId,
-                        //     language: _.albumLanguage,
-                        //     album_name: _.albumName,
-                        //     artist_name: _.artistName,
-                        //     composer: _.composer,
-                        //     arrangement: _.arrangement,
-                        //     song_name: _.songName,
-                        //     songwriters: _.songwriters,
-                        //     singers: _.singers,
-                        {
-                            title: 'song_name',
-                            dataIndex: 'song_name'
-                        },
-                        {
-                            title: 'artist_name',
-                            dataIndex: 'artist_name'
-                        }, {
-                            title: 'album_name',
-                            dataIndex: 'album_name'
-                        },
-                        {
-                            title: 'description',
-                            dataIndex: 'description'
-                        },
-                        {
-                            title: 'composer',
-                            dataIndex: 'composer'
-                        }
-                    ],
-                    userId: null,
-                    viewSongs: [],
-                    runErrors: [],
-                    statusBox: false,
-                    useMaxSize: false,
-                    skipDown: false,
-                    saveDir: null,
-                    user: null,
-                    showSub: false,
-                    pwd: null,
-                    currentPage: 1,
-                    showDownloader: false,
-                    currentStatus: null,
-                    starting: false,
+                    token: null,
                     inited: false,
-                    loading: true,
-                    userData: null,
-                    songs: null,
-                    logs: [],
-                    topStyles: [],
-                    dataTabs: [],
-                    downloadSongs: null,
+                    obting: false,
+                    tabs: [],
                 },
                 mounted() {
                     this.loading = false;
                     this.inited = true;
-                    // this.saveDir = window.localStorage.getItem('saveDir')
-                    // this.user = window.localStorage.getItem('user')
-                    // this.pwd = window.localStorage.getItem('pwd')
-                    // this.useMaxSize = window.localStorage.getItem('useMaxSize') ? true : false;
-                    // let params = (new URL(document.location)).searchParams;
-                    // let uid = params.get("uid");
-                    // if (isNaN(parseInt(uid))) {
-                    //     alert('https://www.xiami.com/user/{这一段是你的ID}， 或者打开虾米app最底部有段数字');
-                    //     return;
-                    // }
-                    // this.init(uid)
-                    // if (this.saveDir) {
-                    //     // this.startTask();
-                    // }
-                    // window.progress = (log) => {
-                    //     log.results = Object.keys(log.results)
-                    //     this.logs.unshift(log);
-                    //     if (this.logs.length > 20) {
-                    //         this.logs.pop();
-                    //     }
-                    // }
-                    // this.loadStatus();
-                    // this.timer = setInterval(() => {
-                    //     this.loadStatus();
-                    // }, 3000);
+                    if(window.localStorage.getItem('token')) {
+                        this.token = JSON.parse(window.localStorage.getItem('token'));
+                    }
+                    // window.localStorage.setItem('token', JSON.stringify(accesToken))
                 },
                 computed: {
-                    paginationProps() {
-                        return {
-                            showSizeChanger: true,
-                            current: this.currentPage,
-                            pageSizeOptions: ['25', '96', '200', '800'],
-                            defaultPageSize: 25,
-                            showTotal: total => `全部 ${total} 结果`,
-                            onChange: (page, pageSize) => {
-                                this.currentPage = page
-                                console.log(page, pageSize)
-                                this.goTop();
-                            }
-                        }
-                    }
                 },
                 watch: {
-                    useMaxSize() {
-                        window.localStorage.setItem('useMaxSize', this.useMaxSize)
-                    },
-                    saveDir() {
-                        window.localStorage.setItem('saveDir', this.saveDir)
-                    },
-                    user() {
-                        window.localStorage.setItem('user', this.user)
-                    },
-                    pwd() {
-                        window.localStorage.setItem('pwd', this.pwd)
+                    async code() {
+                        this.retriveCode()
                     }
                 },
                 methods: {
+                    async retriveCode() {
+                        if(this.code && this.instAPI && !this.obting) {
+                            this.obting = true;
+                            var accesToken = await this.instAPI.tryRetriveToken(this.code);
+                            if(accesToken.error) {
+                                alert(accesToken.error)
+                            } else {
+                                window.localStorage.setItem('token', JSON.stringify(accesToken))
+                                // console.log(' ', accesToken);
+                            }
+                            this.obting = false;
+                            this.token = accesToken
+                        }
+                    },
                     showError() {
                         this.$info({
                             title: '错误内容',
                             content: JSON.stringify(this.runErrors, null, 2)
                         });
                     },
-                    //  async createTask() {
-                    //     const { data } = await api.get('/downloader/create', {
-                    //     })
-                    //     this.totalTask = data.task.length;
-                    //     return data;
-                    // },
-                    async startImport() {
-                        const allSongs = this.userData;
-                        console.log('allSongs', allSongs)
-                    },
-                    async startTask() {
-                        try {
-                            var taskP = {
-                                // skipDownload: 1,
-                                saveDir: this.saveDir,
-                                user: this.user,
-                                pwd: this.pwd
-                            }
-    
-                            if (this.skipDown) {
-                                taskP.skipDownload = 1;
-                            }
-    
-                            taskP.useMaxSize = this.useMaxSize;
-                            const { data } = await api.get('/downloader/start', {
-                                params: taskP
-                            })
-                            if (data.error) {
-                                alert(data.error)
-                            }
-                        } catch (e) {
-                            alert('start error=' + e.toString());
+                    async startAuth() {
+
+                        if(!this.waitCode) {
+                            this.instAPI = new MastdonApi(this.url);
+                            await this.instAPI.getCode();
+                            this.waitCode = true
                         }
+                        
+                        if(this.waitCode) {
+                            console.log('wait code')
+                            this.retriveCode()
+                        }
+                    },
+
+                    async runImportTask() {
+                        if(!this.token) {
+                            alert('未授权')
+                            return
+                        }
+                        var importer = new DataImporter(this.url, this.token);
+                        await importer.importAll();
                     },
                     async customRequest(options) {
                         const toText = file => new Promise((resolve, reject) => {
@@ -1113,184 +837,19 @@
                         const dataText = await toText(options.file);
                         this.userData = JSON.parse(dataText)
                         console.log('this.userData', this.userData )
+                        this.tabs = Object.keys(this.userData).map(_ => {
+                            return {
+                                type: _,
+                                count: this.userData[_].length
+                            }
+                        })
+                        this.runImportTask()
                         options.onSuccess({
 
                         }, options.file)
                     },
-                    async startDownload() {
-                        if (!this.saveDir) {
-                            this.$info({
-                                title: '提示',
-                                content: '存储文件夹不能为空, 账号、密码'
-                            });
-                            return;
-                        }
-                        const stepData = chunk(this.downloadSongs, 5000);
-                        console.log('data', stepData)
-                        for (let index = 0; index < stepData.length; index++) {
-                            const stepDataRows = stepData[index];
-                            console.log('stepDataRows', stepDataRows)
-                            const { data } = await api.post('/downloader/create', {
-                                songIds: stepDataRows.map(_ => _.song_id)
-                            })
-                        }
-                        // this.totalTask = data.task.length;
-                        this.startTask();
-                        this.downloading = true;
-                        this.showDownloader = false;
-                        this.statusBox = true;
-                    },
-    
-                    async loadStatus() {
-                        const { data } = await api.get('/downloader/status')
-                        this.currentStatus = data;
-                        this.runErrors = data.status.runErrors;
-                        this.recentTasks = data.status.doneTasks.reverse().slice(0, 50)
-                    },
-    
-                    handleChange(e) {
-                        this.skipDown = e.target.checked;
-                    },
-                    createTask(data) {
-                        this.downloadSongs = data;
-                        console.log('downloadSongs', this.downloadSongs)
-                        this.showDownloader = true
-                    },
-                    saveFile() {
-                        // console.log(this.userData)
-                        download(JSON.stringify(this.userData), 'backup.json', 'application/json');
-                    },
-                    goTop() {
-                        document.body.scrollTop = 0
-                    },
-    
-                    viewData(songs) {
-                        this.viewSongs = songs
-                        this.showSub = true;
-                    },
-                    async init(uid) {
-    
-                        this.userId = uid
-                        try {
-                            const eDoc = await dataDB.get('state_' + uid)
-                            console.log('eDoc', eDoc);
-                            if (eDoc.state && Object.keys(eDoc.state).length > 2) {
-                                this.vis(eDoc.state)
-                            } else {
-                                alert('数据错误，准备重新导出')
-                                throw new Error('data error')
-                            }
-                        } catch (e) {
-                            console.log(e);
-                            this.startBackup(uid)
-                        }
-                    },
-    
-                    vis(userData) {
-                        this.userData = userData
-                        this.dataTabs = Object.keys(userData).map(_ => {
-                            if (userData[_].length == 0) return null;
-    
-                            const allColumns = Object.keys(userData[_][0]).map(c => {
-                                var cloudConfig = {
-                                    title: c,
-                                    dataIndex: c
-                                }
-                                if (['album_logo', 'collect_logo', 'artist_logo', 'avatar'].indexOf(c) > -1) {
-                                    cloudConfig.scopedSlots = {
-                                        customRender: 'imgcover'
-                                    }
-                                }
-    
-                                if ([
-                                    'views',
-                                    'collects',
-                                    'likes',
-                                    'play_count',
-                                    'recommends',
-                                    'comments'].indexOf(c) > -1) {
-                                    cloudConfig.sorter = (a, b) => {
-                                        // console.log('sort', a, b)
-                                        return a[c] - b[c]
-                                    };
-                                }
-    
-    
-                                // scopedSlots: { customRender: 'imgcover' },
-                                return cloudConfig
-                            });
-    
-                            if (_.indexOf('collect') > -1) {
-                                allColumns.unshift({
-                                    title: '操作',
-                                    dataIndex: 'action',
-                                    scopedSlots: {
-                                        customRender: 'download'
-                                    }
-                                });
-                                allColumns.unshift({
-                                    title: 'songs',
-                                    dataIndex: _,
-                                    scopedSlots: {
-                                        customRender: 'subtable'
-                                    }
-                                });
-                            }
-    
-    
-    
-                            // download
-                            return {
-                                name: _,
-                                type: _,
-                                columns: allColumns,
-                                total: userData[_].length,
-                                data: userData[_]
-                            }
-                        }).filter(_ => _);
-                    },
-                    async startBackup(uid) {
-    
-                        if (!uid) {
-                            let params = (new URL(document.location)).searchParams;
-                            uid = params.get("uid");
-                            // this.init(uid)
-                        }
-                        console.log('startBackup', uid)
-                        this.starting = true
-                        let userData = null
-                        this.userId = uid
-                        try {
-                            userData = await getUserAllFavorites(uid);
-                            console.log('userData', userData)
-                        } catch (e) {
-                            alert(e.toString())
-                            return;
-                        }
-    
-                        this.starting = false;
-                        // await dataDB.put()
-                        var stateDoc = 'state_' + uid;
-                        try {
-                            const eDoc = await dataDB.get(stateDoc)
-                            eDoc.state = userData
-                            eDoc.time = Date.now()
-                            await dataDB.put(eDoc)
-                        } catch (e) {
-                            console.log('update failed try create')
-                            await dataDB.put({
-                                _id: stateDoc,
-                                state: userData,
-                                time: Date.now()
-                            })
-                        }
-    
-                        this.vis(userData);
-    
-                    }
                 },
             })
-    
     
         </script>
     </body>
