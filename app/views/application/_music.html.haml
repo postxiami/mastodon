@@ -1,7 +1,10 @@
 
-.image-wall{ style: 'display: flex;flex-wrap: wrap;'}
-  .itemwrap{ style: 'text-align: center; overflow: hidden' }
-    = row[:cover] ? image_tag(row[:cover], alt: '', height: 300, style: '') : ''
-    .card__bar
-      = "#{row[:name]}  -  #{row[:artist_name]} - #{row[:album_name]}"
-
+.grid-items-item
+  .grid-items-cover-image.link-block
+    .grid-items-cover-image-image
+      = @content_type == "song" ? image_tag(row.album[:cover], alt: '') : image_tag(row[:cover], alt: '')
+    .grid-items-item-details
+      %p.grid-items-item-main-text
+        = "#{row[:name]}"
+      %p.grid-items-item-aux-text
+        = @content_type == "song" ? "#{row[:artist_name]} - #{row[:album_name]}" : "#{row[:artist_name]}"

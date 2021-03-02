@@ -24,27 +24,26 @@ class AccountMusicController < ApplicationController
 
   def rows
     return @rows if defined?(@rows)
-
-    account = current_account
+    # account = current_account
     if params[:content_type]
       if params[:content_type] == 'song'
-        query = Track.joins("INNER JOIN collections ON collections.collectable_id = tracks.id AND ctype = 1 AND account_id = " + account[:id].to_s)
+        query = Track.joins("INNER JOIN collections ON collections.collectable_id = tracks.id AND ctype = 1 AND account_id = " + @account[:id].to_s)
       end
 
       if params[:content_type] == 'album'
-        query = Album.joins("INNER JOIN collections ON collections.collectable_id = albums.id AND ctype = 2 AND account_id = " + account[:id].to_s)
+        query = Album.joins("INNER JOIN collections ON collections.collectable_id = albums.id AND ctype = 2 AND account_id = " + @account[:id].to_s)
       end
 
       if params[:content_type] == 'artist'
-        query = Artist.joins("INNER JOIN collections ON collections.collectable_id = artists.id AND ctype = 3 AND account_id = " + account[:id].to_s)
+        query = Artist.joins("INNER JOIN collections ON collections.collectable_id = artists.id AND ctype = 3 AND account_id = " + @account[:id].to_s)
       end
     else
-      query = Album.joins("INNER JOIN collections ON collections.collectable_id = albums.id AND ctype = 2 AND account_id = " + account[:id].to_s)
+      query = Album.joins("INNER JOIN collections ON collections.collectable_id = albums.id AND ctype = 2 AND account_id = " + @account[:id].to_s)
     end
 
     @rows = []
     if query
-      @rows = query.page(params[:page]).per(40)
+      @rows = query.page(params[:page]).per(90)
     end
     # scope = Follow.where(account: @account)
     # scope = scope.where.not(target_account_id: current_account.excluded_from_timeline_account_ids) if user_signed_in?

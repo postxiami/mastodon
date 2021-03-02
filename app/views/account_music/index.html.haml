@@ -8,9 +8,6 @@
 
 .h-feed
   %data.p-name{ value: "#{@account.username} on #{site_hostname}" }/
-
-  .ptype
-    = "#{@content_type}"
   .account__section-headline
     = active_link_to "歌曲", account_music_list_url(@account, content_type: :song)
     = active_link_to "专辑", account_music_list_url(@account, content_type: :album)
@@ -24,6 +21,6 @@
   = nothing_here
 - else
   .wrap{ style: "height: 20px" }
-  .card-grid{ style: "padding-top: 15px; background: #282c37;" }
+  .data-card{ class: "grid-items content-#{@content_type}"}
     = render partial: 'application/music', collection: @rows, as: :row
   = paginate @rows

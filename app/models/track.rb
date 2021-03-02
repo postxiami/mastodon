@@ -17,6 +17,6 @@
 class Track < ApplicationRecord
 	include Paginable
 	
-	has_one :album
-	has_one :artist
+	belongs_to :album
+	belongs_to :artist
 end
