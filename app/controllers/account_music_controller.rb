@@ -14,6 +14,7 @@ class AccountMusicController < ApplicationController
     respond_to do |format|
       format.html do
         expires_in 0, public: true unless user_signed_in?
+        @content_type = params[:content_type]
         rows
       end
     end

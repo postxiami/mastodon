@@ -9,12 +9,12 @@
 .h-feed
   %data.p-name{ value: "#{@account.username} on #{site_hostname}" }/
 
+  .ptype
+    = "#{@content_type}"
   .account__section-headline
     = active_link_to "歌曲", account_music_list_url(@account, content_type: :song)
     = active_link_to "专辑", account_music_list_url(@account, content_type: :album)
     = active_link_to "艺术家", account_music_list_url(@account, content_type: :artist)
-
-
 
 - if @account.user_hides_network?
   .nothing-here= t('accounts.network_hidden')

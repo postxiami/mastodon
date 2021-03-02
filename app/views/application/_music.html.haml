@@ -3,5 +3,5 @@
   .itemwrap{ style: 'text-align: center; overflow: hidden' }
     = row[:cover] ? image_tag(row[:cover], alt: '', height: 300, style: '') : ''
     .card__bar
-      = "#{row[:name]}  -  #{row[:artist_name]}"
+      = "#{row[:name]}  -  #{row[:artist_name]} - #{row[:album_name]}"
 
