@@ -1,0 +1,1 @@
+bin/rails generate migration AddMusicCountToAccount songs_count:bigint

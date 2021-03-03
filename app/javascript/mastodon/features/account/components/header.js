@@ -350,6 +350,14 @@ class Header extends ImmutablePureComponent {
                     renderer={counterRenderer('followers')}
                   />
                 </NavLink>
+
+                <a href={account.get('url') + '/music'} rel='noopener noreferrer' target='_blank'>
+                  音乐 <strong>
+                    <ShortNumber
+                      value={account.get('musics_count')}
+                    />
+                  </strong>
+                </a>
               </div>
             )}
           </div>

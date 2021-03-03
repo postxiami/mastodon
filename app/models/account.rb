@@ -428,7 +428,7 @@ class Account < ApplicationRecord
 
   class << self
     def readonly_attributes
-      super - %w(statuses_count following_count followers_count)
+      super - %w(statuses_count following_count followers_count musics_count)
     end
 
     def inboxes

@@ -95,6 +95,8 @@ Rails.application.routes.draw do
   get '/@:username/with_replies', to: 'accounts#show', as: :short_account_with_replies
   get '/@:username/media', to: 'accounts#show', as: :short_account_media
   get '/@:username/tagged/:tag', to: 'accounts#show', as: :short_account_tag
+  get '/@:username/music', to: redirect('/users/%{username}/music/song')
+
   get '/@:account_username/:id', to: 'statuses#show', as: :short_account_status
   get '/@:account_username/:id/embed', to: 'statuses#embed', as: :embed_short_account_status
   
