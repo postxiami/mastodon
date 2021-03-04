@@ -85,25 +85,23 @@ class Api::V1::Music::CollectionsController < Api::BaseController
 				create_item[key] = data_item[key]
 			end
 		}
-		# if data_item[:cover]
-		# 	create_item[:cover] = data_item[:cover]
-		# end
-		# if data_item[:alias]
-		# 	create_item[:alias] = data_item[:alias]
-		# end
-		# if data_item[:gender]
-		# 	create_item[:gender] = data_item[:gender]
-		# end
-		# if data_item[:play_count]
-		# 	create_item[:play_count] = data_item[:play_count]
-		# end
-		# if data_item[:desc]
-		# 	create_item[:desc] = data_item[:desc]
-		# end
-		# if data_item[:country]
-		# 	create_item[:country] = data_item[:country]
-		# end
-		Artist.where(item).first_or_create(create_item)
+		
+		artist = Artist.where(item).first_or_create(create_item)
+		if(data_item[:tags])
+			tags = data_item[:tags].each { |e|  
+				tag_name = e[:name]
+				tag = MusicTag.where({
+					name: tag_name
+				}).first_or_create({
+					name: tag_name
+				})
+				begin
+					artist.music_tags << tag
+				rescue ActiveRecord::RecordNotUnique
+				end
+			}
+		end
+		artist
   end
   
   def create_album(data_item)

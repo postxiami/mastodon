@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_03_040343) do
+ActiveRecord::Schema.define(version: 2021_03_04_035501) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -234,6 +234,13 @@ ActiveRecord::Schema.define(version: 2021_03_03_040343) do
     t.index ["name", "artist_name"], name: "index_albums_on_name_and_artist_name", unique: true
   end
 
+  create_table "albums_music_tags", id: false, force: :cascade do |t|
+    t.bigint "album_id", null: false
+    t.bigint "music_tag_id", null: false
+    t.index ["music_tag_id", "album_id"], name: "index_albums_music_tags_on_music_tag_id_and_album_id", unique: true
+    t.index ["music_tag_id"], name: "index_albums_music_tags_on_music_tag_id"
+  end
+
   create_table "announcement_mutes", force: :cascade do |t|
     t.bigint "account_id"
     t.bigint "announcement_id"
@@ -279,6 +286,13 @@ ActiveRecord::Schema.define(version: 2021_03_03_040343) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name", "country"], name: "index_artists_on_name_and_country", unique: true
+  end
+
+  create_table "artists_music_tags", id: false, force: :cascade do |t|
+    t.bigint "artist_id", null: false
+    t.bigint "music_tag_id", null: false
+    t.index ["music_tag_id", "artist_id"], name: "index_artists_music_tags_on_music_tag_id_and_artist_id", unique: true
+    t.index ["music_tag_id"], name: "index_artists_music_tags_on_music_tag_id"
   end
 
   create_table "backups", force: :cascade do |t|
@@ -588,6 +602,14 @@ ActiveRecord::Schema.define(version: 2021_03_03_040343) do
     t.boolean "silent", default: false, null: false
     t.index ["account_id", "status_id"], name: "index_mentions_on_account_id_and_status_id", unique: true
     t.index ["status_id"], name: "index_mentions_on_status_id"
+  end
+
+  create_table "music_tags", force: :cascade do |t|
+    t.string "name"
+    t.text "desc"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_music_tags_on_name", unique: true
   end
 
   create_table "mutes", force: :cascade do |t|

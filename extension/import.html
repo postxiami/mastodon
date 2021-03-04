@@ -35,7 +35,6 @@
             }
     
     
-    
             .ant-table-body {
                 overflow-x: auto !important;
             }
@@ -184,14 +183,16 @@
             </a-button>
         </a-card>
 
-        <div style="margin-top: 20px">
+        <div style="margin-top: 20px" v-if="token">
             <a-upload
                 name="file"
                 :custom-request="customRequest"
             >
-                <a-button>导入JSON（xiami2021/backup备份的）</a-button>
+                <a-button>从backup.json导入</a-button>
             </a-upload>
-            {{ tabs }}
+            <span v-if="tabs.length">
+                {{ tabs }}
+            </span>
           </div>
          </div>
       </div>
@@ -725,7 +726,15 @@ function DataImporter(endpoint, token) {
                     gender: _.gender,
                     alias: _.alias,
                     play_count: _.play_count,
-                    country: _.area
+                    country: _.area,
+                    tags: _.styles ? _.styles.filter(d => d.indexOf('|') === -1).filter(d => d.indexOf('/') === -1).map(c => {
+                        var namePairs = c.split(' ');
+                        var cnName = namePairs.shift();
+                        return {
+                            cnName: cnName,
+                            name: namePairs.join(" ").toLowerCase()
+                        }
+                    }) : []
                 }
             }
         });
@@ -775,6 +784,11 @@ function DataImporter(endpoint, token) {
                     if(window.localStorage.getItem('token')) {
                         this.token = JSON.parse(window.localStorage.getItem('token'));
                     }
+
+                    if(window.localStorage.getItem('url')) {
+                        this.url = window.localStorage.getItem('url');
+                    }
+
                     // window.localStorage.setItem('token', JSON.stringify(accesToken))
                 },
                 computed: {
@@ -782,6 +796,10 @@ function DataImporter(endpoint, token) {
                 watch: {
                     async code() {
                         this.retriveCode()
+                    },
+                    async url() {
+                        // this.retriveCode()
+                        window.localStorage.setItem('url', this.url)
                     }
                 },
                 methods: {
