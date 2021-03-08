@@ -85,7 +85,8 @@ class Api::V1::Music::CollectionsController < Api::BaseController
 				create_item[key] = data_item[key]
 			end
 		}
-		
+
+		# increment_count!
 		artist = Artist.where(item).first_or_create(create_item)
 		if(data_item[:tags])
 			tags = data_item[:tags].each { |e|  
@@ -97,6 +98,7 @@ class Api::V1::Music::CollectionsController < Api::BaseController
 				})
 				begin
 					artist.music_tags << tag
+					tag.increment_count!(:artists_count)
 				rescue ActiveRecord::RecordNotUnique
 				end
 			}
@@ -121,21 +123,6 @@ class Api::V1::Music::CollectionsController < Api::BaseController
 				create_item[key] = data_item[key]
 			end
 		}
-		# if data_item[:play_count]
-		# 	create_item[:play_count] = data_item[:play_count]
-		# end
-		# if data_item[:company]
-		# 	create_item[:company] = data_item[:company]
-		# end
-		# if data_item[:cover]
-		# 	create_item[:cover] = data_item[:cover]
-		# end
-		# if data_item[:desc]
-		# 	create_item[:desc] = data_item[:desc]
-		# end
-		# if data_item[:published_at]
-		# 	create_item[:published_at] = data_item[:published_at]
-		# end
 		Album.where(item).first_or_create(create_item)
   end
 end

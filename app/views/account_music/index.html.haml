@@ -18,7 +18,12 @@
 - elsif user_signed_in? && @account.blocking?(current_account)
   .nothing-here= t('accounts.unavailable')
 - elsif @rows.empty?
-  = nothing_here
+  - if user_signed_in?
+    %div.nothing-here 
+      %a.pk{href: "/importer/music.html", style: "color: white"}
+        = "导入数据"
+  - else 
+    = nothing_here
 - else
   .wrap{ style: "height: 20px" }
   .data-card{ class: "grid-items content-#{@content_type}"}

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_04_035501) do
+ActiveRecord::Schema.define(version: 2021_03_08_075342) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -604,6 +604,15 @@ ActiveRecord::Schema.define(version: 2021_03_04_035501) do
     t.index ["status_id"], name: "index_mentions_on_status_id"
   end
 
+  create_table "music_tag_stats", force: :cascade do |t|
+    t.bigint "music_tag_id", null: false
+    t.bigint "albums_count", default: 0, null: false
+    t.bigint "artists_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["music_tag_id"], name: "index_music_tag_stats_on_music_tag_id", unique: true
+  end
+
   create_table "music_tags", force: :cascade do |t|
     t.string "name"
     t.text "desc"
@@ -1098,6 +1107,7 @@ ActiveRecord::Schema.define(version: 2021_03_04_035501) do
   add_foreign_key "media_attachments", "statuses", on_delete: :nullify
   add_foreign_key "mentions", "accounts", name: "fk_970d43f9d1", on_delete: :cascade
   add_foreign_key "mentions", "statuses", on_delete: :cascade
+  add_foreign_key "music_tag_stats", "music_tags", on_delete: :cascade
   add_foreign_key "mutes", "accounts", column: "target_account_id", name: "fk_eecff219ea", on_delete: :cascade
   add_foreign_key "mutes", "accounts", name: "fk_b8d8daf315", on_delete: :cascade
   add_foreign_key "notifications", "accounts", column: "from_account_id", name: "fk_fbd6b0bf9e", on_delete: :cascade
