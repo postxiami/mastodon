@@ -2,7 +2,7 @@
 .grid-items-item
   .grid-items-cover-image.link-block
     .grid-items-cover-image-image
-      = @content_type == "song" ? image_tag(row.album[:cover], alt: '') : image_tag(row[:cover], alt: '')
+      = @content_type == "song" ? row.album[:cover] ? image_tag(row.album[:cover], alt: '') : '' : row[:cover] ? image_tag(row[:cover], alt: '') : ''
     .grid-items-item-details
       %p.grid-items-item-main-text
         = "#{row[:name]}"
