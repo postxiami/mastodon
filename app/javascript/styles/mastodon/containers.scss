@@ -909,7 +909,7 @@
 
 .data-card.grid-items {
   padding: 14px;
-  background: #282c37;
+  background: $ui-base-color;
 }
 
 .grid-items-item {
@@ -994,5 +994,5 @@
 }
 
 .importlink {
-  color: white
+  color: $darker-text-color;
 }
