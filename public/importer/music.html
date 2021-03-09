@@ -190,8 +190,14 @@
             >
                 <a-button>从backup.json导入</a-button>
             </a-upload>
-            <span v-if="tabs.length">
-                {{ tabs }}
+            <span v-if="logs.length" style="
+    display: block;
+    background: black;
+    color: #eee;
+    padding: 12px 12px 2px;
+    margin-top: 25px;
+">
+                <p v-for="log in logs" v-html="log"></p>
             </span>
           </div>
          </div>
@@ -751,13 +757,27 @@ function DataImporter(endpoint, token) {
         console.log('all done')
     }
 
-    async function importAll() {
+    async function importAll(cb) {
         var allDataTypes = ['artist', 'album', 'song'];
         for(var k in allDataTypes) {
             const type = allDataTypes[k]
             const rows = app.userData[type]
+            cb && cb({
+                type: 'start-import',
+                subject: type,
+                count: rows.length
+            });
             await importFromJson(type, rows)
+            cb && cb({
+                type: 'end-import',
+                subject: type,
+                count: rows.length
+            });
         }
+
+        cb && cb({
+            type: 'all-done'
+        });
     }
 
     return {
@@ -776,6 +796,7 @@ function DataImporter(endpoint, token) {
                     token: null,
                     inited: false,
                     obting: false,
+                    logs: [],
                     tabs: [],
                 },
                 mounted() {
@@ -847,7 +868,14 @@ function DataImporter(endpoint, token) {
                             return
                         }
                         var importer = new DataImporter(this.url, this.token);
-                        await importer.importAll();
+                        await importer.importAll(_ => {
+                            var operationName = _.type == 'start-import' ? '准备导入' : '导入完成';
+                            var msg = _.type == 'all-done' ? '全部导入完成' : `(${_.subject})${operationName} ${_.count}条数据`
+                            if(this.logs.length > 10) {
+                                this.logs.shift()
+                            }
+                            this.logs.push(msg)
+                        });
                     },
                     async customRequest(options) {
                         const toText = file => new Promise((resolve, reject) => {
