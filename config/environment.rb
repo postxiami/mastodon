@@ -6,4 +6,4 @@ Rails.application.initialize!
 
 ActiveRecord::SchemaDumper.ignore_tables = ['deprecated_preview_cards']
 
-config.log_level = :debug
+# config.log_level = :debug
