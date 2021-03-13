@@ -120,8 +120,13 @@ class FetchAlbumService < BaseService
       # end
     }
 
+    if @album.cover.nil? && @metadata[:cover]
+      @album.cover = @metadata[:cover]
+    end
+
+    @album.save
     # @album.tracks
-    @metadata
+    @album
   rescue HTTP::Error, OpenSSL::SSL::SSLError, Addressable::URI::InvalidURIError, Mastodon::HostValidationError, Mastodon::LengthValidationError => e
     Rails.logger.debug "Error fetching link #{@url}: #{e}"
     nil
