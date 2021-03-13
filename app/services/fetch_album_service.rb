@@ -20,6 +20,8 @@ class FetchAlbumService < BaseService
         @html = nil
       end
     end
+    
+    return @metadata if @html.nil?
 
     detector = CharlockHolmes::EncodingDetector.new
     detector.strip_tags = true
@@ -38,7 +40,11 @@ class FetchAlbumService < BaseService
     #     raise Mastodon::RaceConditionError
     #   end
     # end
-    cover_tag = page.css('.album-overview-cover-art img')
+    if (page.css('.album-overview-cover-art').length)
+      cover_tag = page.css('.album-overview-cover-art img')
+      @metadata[:cover] = cover_tag[0] ? cover_tag[0].attr("src") : nil
+    end
+   
     all_tags = page.css('.tags-list .tag a')
     @metadata[:tags] = all_tags.map { |el|
       el.content
@@ -67,7 +73,6 @@ class FetchAlbumService < BaseService
     }
 
     # @metadata[]
-    @metadata[:cover] = cover_tag[0].attr("src")
 
     if page.css(".about-artist").length
       artist_meta = {}
@@ -80,9 +85,9 @@ class FetchAlbumService < BaseService
       @metadata[:artist] = artist_meta
     end 
 
-    @metadata[:pub] = page.css('.metadata-column dt')[1].next_element.text
-    
-    
+    if page.css('.metadata-column dt').length > 1
+      @metadata[:pub] = page.css('.metadata-column dt')[1].next_element.text
+    end
     @metadata[:name] = page.css('.header-new-title')[0].content.strip
 
     @metadata
