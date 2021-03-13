@@ -16,4 +16,5 @@
 #
 class Album < ApplicationRecord
 	include Paginable
+	has_many :tracks
 end

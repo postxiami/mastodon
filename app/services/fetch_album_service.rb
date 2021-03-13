@@ -78,7 +78,7 @@ class FetchAlbumService < BaseService
       artist_meta = {}
       artist_meta[:name] = page.css(".about-artist .about-artist-name")[0].content.strip
       artist_meta[:listeners] = page.css(".about-artist .about-artist-listeners")[0].content.strip
-      artist_meta[:cover] = page.css(".about-artist .gallery-preview-image--0 img")[0].attr('src')
+      artist_meta[:cover] = page.css(".about-artist .gallery-preview-image--0 img")[0] ? page.css(".about-artist .gallery-preview-image--0 img")[0].attr('src') : nil
       artist_meta[:tags] = page.css(".about-artist-tags .tag").map { |el|
         el.content
       }
@@ -90,7 +90,10 @@ class FetchAlbumService < BaseService
     end
     @metadata[:name] = page.css('.header-new-title')[0].content.strip
 
-    @metadata
+    
+
+    @album
+    # @metadata
   rescue HTTP::Error, OpenSSL::SSL::SSLError, Addressable::URI::InvalidURIError, Mastodon::HostValidationError, Mastodon::LengthValidationError => e
     Rails.logger.debug "Error fetching link #{@url}: #{e}"
     nil
