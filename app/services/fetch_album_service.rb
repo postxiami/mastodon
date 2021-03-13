@@ -69,17 +69,20 @@ class FetchAlbumService < BaseService
     # @metadata[]
     @metadata[:cover] = cover_tag[0].attr("src")
 
-    artist_meta = {}
-    artist_meta[:name] = page.css(".about-artist .about-artist-name")[0].content.strip
-    artist_meta[:listeners] = page.css(".about-artist .about-artist-listeners")[0].content.strip
-    artist_meta[:cover] = page.css(".about-artist .gallery-preview-image--0 img")[0].attr('src')
-    artist_meta[:tags] = page.css(".about-artist-tags .tag").map { |el|
-      el.content
-    }
+    if page.css(".about-artist").length
+      artist_meta = {}
+      artist_meta[:name] = page.css(".about-artist .about-artist-name")[0].content.strip
+      artist_meta[:listeners] = page.css(".about-artist .about-artist-listeners")[0].content.strip
+      artist_meta[:cover] = page.css(".about-artist .gallery-preview-image--0 img")[0].attr('src')
+      artist_meta[:tags] = page.css(".about-artist-tags .tag").map { |el|
+        el.content
+      }
+      @metadata[:artist] = artist_meta
+    end 
 
     @metadata[:pub] = page.css('.metadata-column dt')[1].next_element.text
     
-    @metadata[:artist] = artist_meta
+    
     @metadata[:name] = page.css('.header-new-title')[0].content.strip
 
     @metadata
