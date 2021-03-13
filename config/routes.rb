@@ -469,6 +469,9 @@ Rails.application.routes.draw do
       resource :music, only: [:index, :create, :show, :update, :destroy] do
         resources :collections, controller: 'music/collections'
         get 'my/:content_type', to: 'music/list#index'
+        get 'test', to: 'music/test#index'
+
+        # TestController
         # get 'my/albums', controller: 'music/list#index'
         # get 'my/artists', controller: 'music/list#index'
       end
