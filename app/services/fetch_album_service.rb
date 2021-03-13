@@ -89,11 +89,35 @@ class FetchAlbumService < BaseService
       @metadata[:pub] = page.css('.metadata-column dt')[1].next_element.text
     end
     @metadata[:name] = page.css('.header-new-title')[0].content.strip
+    @metadata[:exists] = []
 
-    
+    @metadata[:tracks].each { |track|
+      is_in = Track.find_by(name: track[:name], album_id: @album.id)
+      if is_in
+        @metadata[:exists].push(is_in)
+      else
+        # create track
+        album_track = Track.new
+        album_track.artist_id = @album.artist_id
+        album_track.album_name = @album.name
+        album_track.artist_name = @album.artist_name
+        album_track.name = track[:name]
+        album_track.track_no = track[:rank].to_i
+        @album.tracks << album_track
+      end
+      # if is_in.nil?
+      #   album_track = Track.new
+      #   album_track.artist_id = @album.artist_id
+      #   album_track.album_name = @album.name
+      #   album_track.artist_name = @album.artist_name
+      #   album_track.name = track[:name]
+      #   album_track.track_no = track[:rank].to_i
+      #   @album.tracks << album_track
+      # end
+    }
 
-    @album
-    # @metadata
+    # @album.tracks
+    @metadata
   rescue HTTP::Error, OpenSSL::SSL::SSLError, Addressable::URI::InvalidURIError, Mastodon::HostValidationError, Mastodon::LengthValidationError => e
     Rails.logger.debug "Error fetching link #{@url}: #{e}"
     nil
