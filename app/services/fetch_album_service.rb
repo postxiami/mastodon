@@ -95,6 +95,10 @@ class FetchAlbumService < BaseService
       is_in = Track.find_by(name: track[:name], album_id: @album.id)
       if is_in
         @metadata[:exists].push(is_in)
+        if is_in.track_no.nil?
+          is_in.track_no = track[:rank].to_i
+          is_in.save
+        end
       else
         # create track
         album_track = Track.new
