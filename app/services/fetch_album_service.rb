@@ -45,7 +45,7 @@ class FetchAlbumService < BaseService
       @metadata[:cover] = cover_tag[0] ? cover_tag[0].attr("src") : nil
     end
    
-    all_tags = page.css('.tags-list .tag a')
+    all_tags = page.css('.col-sm-8 .tags-list .tag a')
     @metadata[:tags] = all_tags.map { |el|
       el.content
     }
@@ -54,7 +54,7 @@ class FetchAlbumService < BaseService
       track_rank = tag.css('.chartlist-index')[0].content
       track_name = tag.css('.chartlist-name')[0].content
       track_duration = tag.css('.chartlist-duration')[0].content
-      track_count = tag.css('.chartlist-count-bar-value')[0].content
+      track_count = tag.css('.chartlist-count-bar-value')[0] ? tag.css('.chartlist-count-bar-value')[0].content : nil
       track = {
         name: track_name.strip,
         rank: track_rank.strip,
@@ -120,13 +120,48 @@ class FetchAlbumService < BaseService
       # end
     }
 
+    if @metadata[:tags]
+      @metadata[:tags].each { |tag_name|  
+        tag = MusicTag.where({name: tag_name})
+        .first_or_create({name: tag_name})
+        begin
+          @album.music_tags << tag unless @album.music_tags.include?(tag)
+          tag.increment_count!(:albums_count) unless @album.music_tags.include?(tag)
+        rescue ActiveRecord::RecordNotUnique
+          puts "eists"
+        end
+      }
+    end
+
+    if @metadata[:artist] && @metadata[:artist][:tags]
+      @metadata[:artist][:tags].each { |tag_name|  
+        tag = MusicTag.where({name: tag_name})
+        .first_or_create({name: tag_name})
+        begin
+          @album.artist.music_tags << tag unless @album.artist.music_tags.include?(tag)
+          tag.increment_count!(:albums_count) unless @album.artist.music_tags.include?(tag)
+        rescue ActiveRecord::RecordNotUnique
+          puts "eists"
+        end
+      }
+    end
+
+    # save album meta
     if @album.cover.nil? && @metadata[:cover]
       @album.cover = @metadata[:cover]
     end
 
     @album.save
-    # @album.tracks
-    @album
+
+    # save artist meta
+    if @metadata[:artist] && @album.artist
+      @album.artist.cover = @metadata[:artist][:cover]
+      @album.artist.save
+    end
+
+    # @album
+    @metadata
+    @album.artist.music_tags
   rescue HTTP::Error, OpenSSL::SSL::SSLError, Addressable::URI::InvalidURIError, Mastodon::HostValidationError, Mastodon::LengthValidationError => e
     Rails.logger.debug "Error fetching link #{@url}: #{e}"
     nil
