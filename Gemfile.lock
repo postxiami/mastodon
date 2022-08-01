@@ -407,7 +407,7 @@ GEM
     parslet (2.0.0)
     pastel (0.8.0)
       tty-color (~> 0.5)
-    pg (1.2.3)
+    pg (1.4.2)
     pghero (2.7.4)
       activerecord (>= 5)
     pkg-config (1.4.5)
@@ -764,7 +764,7 @@ DEPENDENCIES
   parallel (~> 1.20)
   parallel_tests (~> 3.4)
   parslet
-  pg (~> 1.2)
+  pg (~> 1.4)
   pghero (~> 2.7)
   pkg-config (~> 1.4)
   pluck_each (~> 0.1.3)
